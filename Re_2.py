@@ -34,17 +34,17 @@ plt.figure(figsize=(8,6))
 plt.rcParams['patch.force_edgecolor'] = True
 ratings_mean_count['rating_counts'].hist(bins=50)
 plt.title('Rating Distribution')
-#plt.show()
+plt.show()
 plt.figure(figsize=(8,6))
 plt.rcParams['patch.force_edgecolor'] = True
 ratings_mean_count['rating'].hist(bins=50)
 plt.title('Rating Distribution Mean')
-#plt.show()
+plt.show()
 plt.figure(figsize=(8,6))
 plt.rcParams['patch.force_edgecolor'] = True
 sns.jointplot(x='rating', y='rating_counts', data=ratings_mean_count, alpha=0.4)
 plt.title('Combination Of Both')
-#plt.show()
+plt.show()
 
 user_movie_rating = movie_data.pivot_table(index='userId', columns='title', values='rating')
 # print(user_movie_rating.head())
