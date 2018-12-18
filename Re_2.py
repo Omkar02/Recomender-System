@@ -1,65 +1,65 @@
-print('Recommender System for Movies')
+print('***************Recommender System for Movies*********************')
 import pandas as pd
+import random
+
+ratings_data = pd.read_csv("ml-latest-small/ratings.csv")
+# print(ratings_data.head())
+movie_names = pd.read_csv("ml-latest-small/movies.csv")
+a = movie_names['title']
+cn = random.randint(0,100)
+ab = cn +10
+Mo_na = []
+for names in a:
+    Mo_na.append(names)
+while True :
+    print(Mo_na[cn])
+    cn = cn +1
+    if cn == ab:
+        break
+print('---------------------------------Chose any of the  following Flim name-----------------------------------------')
+print('Copy and paste it ')
+mov_na = input("Paste here:")
+movie_data = pd.merge(ratings_data, movie_names, on='movieId')
+# print(movie_data.head())
+# print(movie_data.groupby('title')['rating'].mean().head())
+# print(movie_data.groupby('title')['rating'].mean().sort_values(ascending=False).head())
+# print(movie_data.groupby('title')['rating'].count().sort_values(ascending=False).head())
+ratings_mean_count = pd.DataFrame(movie_data.groupby('title')['rating'].mean())
+ratings_mean_count['rating_counts'] = pd.DataFrame(movie_data.groupby('title')['rating'].count())
+# print(ratings_mean_count.head())
 import matplotlib.pyplot as plt
-import numpy as np
-
-# pass in column names for each CSV and read them using pandas.
-# Column names available in the readme file
-
-#Reading users file:
-u_cols = ['user_id', 'age', 'sex', 'occupation', 'zip_code']
-users = pd.read_csv('ml-100k/u.user', sep='|', names=u_cols,
- encoding='latin-1')
-
-#Reading ratings file:
-r_cols = ['user_id', 'movie_id', 'rating', 'unix_timestamp']
-ratings = pd.read_csv('ml-100k/u.data', sep='\t', names=r_cols,
- encoding='latin-1')
-
-#Reading items file:
-i_cols = ['movie id', 'movie title' ,'release date','video release date', 'IMDb URL', 'unknown', 'Action', 'Adventure',
- 'Animation', 'Children\'s', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy',
- 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
-items = pd.read_csv('ml-100k/u.item', sep='|', names=i_cols,
- encoding='latin-1')
-#-----------Data-----------
-print('----------Users-------------')
-print (users.shape)
-print(users.head())
-print('----------Ratings-------------')
-print (ratings.shape)
-print(ratings.head())
-print('----------Items-------------')
-print (items.shape)
-print(items.head())
-#-----------Finding the rating Distribution-----------
-plt.rc("font", size=15)
-ratings.rating.value_counts(sort=False).plot(kind='bar')
-plt.title('Rating Distribution\n')
-plt.xlabel('Rating')
-plt.ylabel('Count')
-plt.savefig('system2.png', bbox_inches='tight')
+import seaborn as sns
+sns.set_style('dark')
+plt.figure(figsize=(8,6))
+plt.rcParams['patch.force_edgecolor'] = True
+ratings_mean_count['rating_counts'].hist(bins=50)
+plt.title('Rating Distribution')
 #plt.show()
-#---------------Recommendations based on correlations-------
-average_rating = pd.DataFrame(ratings.groupby('movie_id')['rating'].mean())
-average_rating['ratingCount'] = pd.DataFrame(ratings.groupby('movie_id')['rating'].count())
-#print(average_rating.sort_values('ratingCount', ascending=False).head())
-#--------------Excluding user with less than 200 rating and books with <100--------------
-ratings_pivot = ratings.pivot(index='user_id', columns='movie_id',values='rating')
-print(ratings_pivot.shape)
-#print(ratings_pivot.head(5))
-#-------------Testing-----------------
-bones_ratings = ratings_pivot[5]
-similar_to_bones = ratings_pivot.corrwith(bones_ratings)
-corr_bones = pd.DataFrame(similar_to_bones, columns=['pearsonR'])
-corr_bones.dropna(inplace=True)
-corr_summary = corr_bones.join(average_rating['ratingCount'])
-corr_summary = corr_summary.join(items ['movie title'])
-corr_summary = corr_summary.join(items ['movie id'])
-fin = corr_summary.sort_values('pearsonR', ascending=False).head(10)
-print(fin,end=' ')
-#--------------final-----------------------------
+plt.figure(figsize=(8,6))
+plt.rcParams['patch.force_edgecolor'] = True
+ratings_mean_count['rating'].hist(bins=50)
+plt.title('Rating Distribution Mean')
+#plt.show()
+plt.figure(figsize=(8,6))
+plt.rcParams['patch.force_edgecolor'] = True
+sns.jointplot(x='rating', y='rating_counts', data=ratings_mean_count, alpha=0.4)
+plt.title('Combination Of Both')
+#plt.show()
 
+user_movie_rating = movie_data.pivot_table(index='userId', columns='title', values='rating')
+# print(user_movie_rating.head())
+forrest_gump_ratings = user_movie_rating[mov_na]
+# print(forrest_gump_ratings.head() )
 
+movies_like_forest_gump = user_movie_rating.corrwith(forrest_gump_ratings)
 
+corr_forrest_gump = pd.DataFrame(movies_like_forest_gump, columns=['Correlation'])
+corr_forrest_gump.dropna(inplace=True)
+# print(corr_forrest_gump.head())
 
+# print(corr_forrest_gump.sort_values('Correlation', ascending=False).head(10)  )
+corr_forrest_gump = corr_forrest_gump.join(ratings_mean_count['rating_counts'])
+# print(corr_forrest_gump.head())
+print('----------------------------------------------------Output--------------------------------------------------------------')
+print(corr_forrest_gump[corr_forrest_gump ['rating_counts']>50].sort_values('Correlation', ascending=False).head(10))
+print('----------------------------------------------------Output--------------------------------------------------------------')
